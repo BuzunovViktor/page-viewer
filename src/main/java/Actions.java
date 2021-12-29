@@ -40,13 +40,7 @@ public class Actions {
     }
 
     void startTorService(){
-        ProcessBuilder p = new ProcessBuilder();
-        p.command(currentFolder+"\\tor-win32-0.4.6.9\\Tor\\tor.exe");
-        try {
-            p.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        inputCommand("cmd /c /hid " + currentFolder + "\\tor-win32-0.4.6.9\\Tor\\tor.exe");
     }
 
     Boolean checkTorService() { //получить список процессов

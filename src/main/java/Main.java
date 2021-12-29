@@ -95,14 +95,10 @@ public class Main {
             jPanelButton.add(buttonStart);
             jPanelTextArea.add(new JScrollPane(jTextArea));
 
-
-
             jFrame.add(jPanelUrl);
             jFrame.add(jPanelTime);
             jFrame.add(jPanelButton);
             jFrame.setVisible(true);
-
-
         }
 
         void openURL() {
@@ -111,7 +107,7 @@ public class Main {
             actions.connectSelenide(jTextFieldUrl.getText(),
                     Integer.parseInt(jTextFieldStartTime.getText()),
                     Integer.parseInt(jTextFieldStopTime.getText()));
-            actions.restartTorService();
+            actions.killTorService();
         }
 
     }
