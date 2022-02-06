@@ -1,12 +1,103 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 public class Main {
+    private JPanel jPanel;
+    private JTextField pathTF;
+    private JLabel pathLabel;
+    private JTextArea textArea1;
+    private JButton chooseFileButton;
+    private JTextField fromTF;
+    private JTextField toTF;
+    private JLabel timeLabel;
+    private JButton startButton;
+
+    private String path;
+
+    public Main() {
+        FileInputStream fis;
+        Properties property = new Properties();
+        try {
+            fis = new FileInputStream("src/main/resources/app.config");
+            property.load(fis);
+            path = property.getProperty("path");
+            pathTF.setText(path);
+        } catch (IOException e) {
+            System.err.println("ОШИБКА: Файл свойств отсуствует!");
+        }
+
+
+        chooseFileButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+                int returnValue = jfc.showOpenDialog(null);
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = jfc.getSelectedFile();
+                    pathTF.setText(selectedFile.getAbsolutePath());
+                    path = Paths.get(FileSystems.getDefault().getPath(pathTF.getText().trim()).toString()).toString();
+                }
+            }
+        });
+        startButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                try {
+                    textArea1.append(path + "\n");
+                    if (path == null || path.equals("")) {
+                        textArea1.append("Выберите путь до приложения.\n");
+                    }
+                    String param[] = {
+                            "cmd",
+                            "/c",
+                            "start",
+                            "/min",
+                            path,
+                            "--incognito"
+                    };
+                    Process process = Runtime.getRuntime().exec(param);
+                    process.waitFor();
+                    System.out.println(process.isAlive());
+                    textArea1.append("Программа запущена.\n");
+                } catch (IOException | InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        pathTF.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                super.keyTyped(e);
+                path = Paths.get(FileSystems.getDefault().getPath(pathTF.getText().trim()).toString()).toString();
+            }
+        });
+    }
+
     public static void main(String[] args) {
-        GUI gui = new GUI();
-        gui.createForm();
+        JFrame jFrame = new JFrame("Main");
+        jFrame.setContentPane(new Main().jPanel);
+        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jFrame.pack();
+        jFrame.setMinimumSize(new Dimension(500, 600));
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        jFrame.setLocation((dim.width - jFrame.getSize().width) / 2,
+                (dim.height - jFrame.getSize().height) / 2);
+        jFrame.setVisible(true);
     }
 
     {
@@ -24,95 +115,46 @@ public class Main {
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
-        final JPanel panel1 = new JPanel();
-        panel1.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        jPanel = new JPanel();
+        jPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(7, 6, new Insets(15, 15, 15, 15), 10, 10));
+        jPanel.setMinimumSize(new Dimension(500, 200));
+        pathLabel = new JLabel();
+        pathLabel.setText("Путь до приложения");
+        jPanel.add(pathLabel, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 6, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_NORTHWEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        chooseFileButton = new JButton();
+        chooseFileButton.setText("Выбрать");
+        jPanel.add(chooseFileButton, new com.intellij.uiDesigner.core.GridConstraints(1, 2, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        fromTF = new JTextField();
+        jPanel.add(fromTF, new com.intellij.uiDesigner.core.GridConstraints(3, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        toTF = new JTextField();
+        jPanel.add(toTF, new com.intellij.uiDesigner.core.GridConstraints(3, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        timeLabel = new JLabel();
+        timeLabel.setText("Время посещения");
+        jPanel.add(timeLabel, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        pathTF = new JTextField();
+        jPanel.add(pathTF, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_NORTH, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, new Dimension(-1, 28), null, null, 0, false));
+        textArea1 = new JTextArea();
+        textArea1.setEditable(false);
+        jPanel.add(textArea1, new com.intellij.uiDesigner.core.GridConstraints(6, 0, 1, 4, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setText("Журнал работы");
+        jPanel.add(label1, new com.intellij.uiDesigner.core.GridConstraints(5, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("Текущее состояние:");
+        jPanel.add(label2, new com.intellij.uiDesigner.core.GridConstraints(4, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        startButton = new JButton();
+        startButton.setText("Запустить");
+        jPanel.add(startButton, new com.intellij.uiDesigner.core.GridConstraints(4, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("Не запущено");
+        jPanel.add(label3, new com.intellij.uiDesigner.core.GridConstraints(4, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
-    static class GUI {
-        Actions actions = new Actions();
-        JFrame jFrame = new JFrame("Page viewer");
-        JPanel jPanelUrl = new JPanel();
-        JTextField jTextFieldUrl = new JTextField(15);
-        JLabel jLabelUrl = new JLabel("Input URL");
-        JLabel jLabelStart = new JLabel("Timer before Start");
-        JLabel jLabelEnd = new JLabel("Timer after End");
-        JPanel jPanelTime = new JPanel();
-        JTextField jTextFieldStartTime = new JTextField(5);
-        JTextField jTextFieldStopTime = new JTextField(5);
-        JButton buttonStart = new JButton("Start");
-        JTextField jTextFieldLogin = new JTextField(10);
-        JPasswordField jPasswordField = new JPasswordField(10);
-        JPanel jPanelButton = new JPanel();
-        JPanel jPanelTextArea = new JPanel();
-        JTextArea jTextArea = new JTextArea("", 30, 40);
-
-        public JTextField getjTextFieldStartTime() {
-            return jTextFieldStartTime;
-        }
-
-        public JTextField getjTextFieldStopTime() {
-            return jTextFieldStopTime;
-        }
-
-        public JTextField getjTextFieldLogin() {
-            return jTextFieldLogin;
-        }
-
-        public JPasswordField getjPasswordField() {
-            return jPasswordField;
-        }
-
-        public JTextField getTextField() {
-            jTextFieldUrl.getText();
-            return this.jTextFieldUrl;
-        }
-
-        public void createForm() {
-            jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            jFrame.setSize(400, 200);
-            jFrame.setLocationRelativeTo(null);
-            jFrame.setLayout(new FlowLayout());
-            jTextFieldUrl.setText("https://yoip.ru");
-            jPanelUrl.add(jTextFieldUrl);
-            jPanelUrl.add(jLabelUrl);
-            jTextFieldStartTime.setText("3");
-            jTextFieldStopTime.setText("6");
-            jPanelTime.add(jLabelStart);
-            jPanelTime.add(jTextFieldStartTime);
-            jPanelTime.add(jLabelEnd);
-            jPanelTime.add(jTextFieldStopTime);
-            jTextArea.setEditable(false);
-            jTextArea.setLineWrap(true);
-            jTextArea.setWrapStyleWord(true);
-            buttonStart.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println("START");
-                    while (true)
-                        openURL();
-                }
-            });
-            jPanelButton.add(buttonStart);
-            jPanelTextArea.add(new JScrollPane(jTextArea));
-
-
-
-            jFrame.add(jPanelUrl);
-            jFrame.add(jPanelTime);
-            jFrame.add(jPanelButton);
-            jFrame.setVisible(true);
-
-
-        }
-
-        void openURL() {
-            actions.startTorService();
-            System.out.println(jTextFieldUrl.getText());
-            actions.connectSelenide(jTextFieldUrl.getText(),
-                    Integer.parseInt(jTextFieldStartTime.getText()),
-                    Integer.parseInt(jTextFieldStopTime.getText()));
-            actions.restartTorService();
-        }
-
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return jPanel;
     }
+
 }
