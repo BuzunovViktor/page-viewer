@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact name="page-viewer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/viewer</output-path>
+    <root id="root">
+      <element id="archive" name="page-viewer.jar">
+        <element id="module-output" name="page-viewer" />
+      </element>
+    </root>
+  </artifact>
+</component>
