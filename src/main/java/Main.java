@@ -149,6 +149,7 @@ public class Main {
                             if (started) {
                                 log("Конец итерации " + counter + ". Следующий запуск через 5 сек.");
                             }
+                            Runtime.getRuntime().exec("taskkill /F /IM firefox.exe");
                             Thread.sleep(5000);
                         } catch (InterruptedException | IOException ex) {
                             log("Произошла ошибка во время работы программы. Следующее сообщение содержит техническую информацию об ошибке:");
